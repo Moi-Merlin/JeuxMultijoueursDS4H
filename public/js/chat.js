@@ -1,8 +1,6 @@
 let username;
 let conversation, data, datasend, users;
-
 let artificialLatencyDelay=0;
-
 let socket;
 
 // on load of page
@@ -125,4 +123,11 @@ function changeArtificialLatency(value) {
 
   let spanDelayValue = document.querySelector("#delay");
   spanDelayValue.innerHTML = artificialLatencyDelay;
+}
+
+function changeNbUpdateSec(value) {
+  nbUpdatesPerSeconds = parseInt(value);
+
+  let spanUpdateValue = document.querySelector("#nbUpdates");
+  spanUpdateValue.innerHTML = nbUpdatesPerSeconds;
 }
