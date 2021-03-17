@@ -1,21 +1,68 @@
+body{
+  background-color: whitesmoke;
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+  overflow: hidden;
+}
+
 #myCanvas {
-    border: 1px solid red;
-    background-color:pink;
-  }
+  border: 3px solid orange;
+  border-radius: 2em;
+  background-color:white;
+}
 
-  .userList {
-    float:left;
-    width:100px;
-    height:300px;
-    border-right:1px solid black;
-    padding:10px;
-    overflow:scroll-y;
-  }
+.title{
+  color: rgba(0, 106, 255, 0.66);
+  font-size: large;
+}
 
-  .chatMessages {
-    float:left;
-    width:300px;
-    height:250px;
-    overflow:scroll-y;
-    padding:10px;
-  }
+.userList {
+  font-family: Helvetica;
+  float: left;
+  width:100px;
+  height:250px;
+  border-right: 2px solid black;
+  padding:10px;
+  overflow:scroll-y;
+}
+
+.chatMessages {
+  float: left;
+  font-family: Helvetica;
+  width:300px;
+  height:250px;
+  overflow:scroll-y;
+  padding:10px;
+  color: grey;
+}
+
+.infos{
+  font-family: Arial, Helvetica, sans-serif;
+  float: right;
+  border: 3px solid grey;
+  text-align: center;
+}
+
+.slider{
+  -webkit-appearance: none;
+  width: 70%;
+  height: 10px;
+  border-radius: 5px;  
+  background: rgba(124, 163, 222, 0.896);
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  cursor: pointer;
+}
+
+.slider :hover{
+  opacity : 2;
+}
+
+#datasend{
+  border-radius: 2em;
+  background-color: rgba(0, 106, 255, 0.66);
+  color: white;
+}

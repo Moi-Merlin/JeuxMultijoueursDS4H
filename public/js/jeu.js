@@ -2,7 +2,8 @@ let canvas, ctx, mousePos;
 
 // Autres joueurs
 let allPlayers = {};
-let target = {x:150, y:200, radius:50, color:'yellow'};
+let canv = document.getElementsByTagName("canvas")
+let target = {x:400, y:225, radius:40, color:'rgba(152, 222, 217, .5)'};
 
 let obstacles = [];
 
@@ -17,9 +18,6 @@ function startGame() {
   ctx = canvas.getContext("2d");
 
   // Les écouteurs
-  //canvas.addEventListener("mousedown", traiteMouseDown);
-  //canvas.addEventListener("mousemove", traiteMouseMove);
-
   canvas.onkeydown = processKeydown;
   canvas.onkeyup = processKeyup;
 
@@ -29,10 +27,12 @@ function startGame() {
 }
 
 function createObstacles() {
-  let o1 = {x:50, y:50, width:20, height:100, color:"black", vy:50, range:110}
-  let o2 = {x:150, y:50, width:20, height:50, color:"orange", vy:30, range:100}
+  let o1 = {x:300, y:50, width:50, height:50, color:"goldenrod", v:50, range:10, movement:'V'}
+  let o2 = {x:150, y:50, width:20, height:50, color:"orange", v:30, range:100, movement:'V'}
+  let o3 = {x:50, y:50, width:60, height:20, color:"yellowgreen", v:40, range:100, movement:'H'}
   obstacles.push(o1);
   obstacles.push(o2);
+  obstacles.push(o3);
 }
 
 function processKeydown(event) {
@@ -70,23 +70,6 @@ function processKeyup(event) {
   }
 }
 
-function traiteMouseDown(evt) {
-  console.log("mousedown");
-}
-
-function traiteMouseMove(evt) {
-  console.log("mousemove");
-
-  mousePos = getMousePos(canvas, evt);
-  //console.log(mousePos.x + " " + mousePos.y);
-
-  allPlayers[username].x = mousePos.x;
-  allPlayers[username].y = mousePos.y;
-
-  console.log("On envoie sendPos");
-  let pos = { user: username, pos: mousePos };
-  socket.emit("sendpos", pos);
-}
 
 function updatePlayerNewPos(newPos) {
   allPlayers[newPos.user].x = newPos.pos.x;
@@ -101,12 +84,8 @@ function updatePlayers(listOfPlayers) {
 
 function drawPlayer(player) {
   ctx.save();
-
   ctx.translate(player.x, player.y);
-
-  ctx.strokeStyle = "green";
   ctx.fillRect(0, 0, 10, 10);
-
   ctx.restore();
 }
 
@@ -114,14 +93,6 @@ function drawAllPlayers() {
   for (let name in allPlayers) {
     drawPlayer(allPlayers[name]);
   }
-}
-
-function getMousePos(canvas, evt) {
-  var rect = canvas.getBoundingClientRect();
-  return {
-    x: evt.clientX - rect.left,
-    y: evt.clientY - rect.top,
-  };
 }
 
 function moveCurrentPlayer() {
@@ -135,20 +106,11 @@ function moveCurrentPlayer() {
 
 function drawTarget() {
   ctx.save();
-
-  ctx.translate(target.x, target.y);
-
-  // draws the target as a circle
-  ctx.beginPath();
   ctx.fillStyle = target.color;
-  ctx.arc(0, 0, target.radius, 0, Math.PI*2);
-  ctx.fill();
-
-  ctx.lineWidth=5;
-  ctx.strokeStyle = "black";
-  ctx.stroke();
-
-  ctx.restore();
+  ctx.arc(target.x, target.y, target.radius, 0, 2 * Math.PI);
+  ctx.lineWidth="4";
+  ctx.strokeStyle = 'black';
+  ctx.fill(); ctx.stroke(); ctx.restore();
 }
 
 // Collisions between rectangle and circle
@@ -173,7 +135,7 @@ function checkIfPlayerHitTarget(player) {
     player.x = 10;
     player.y = 10;
   } else {
-    target.color = "yellow";
+    target.color = 'rgba(152, 222, 217, .5)'
   }
 }
 
@@ -184,21 +146,35 @@ function drawObstacles() {
     ctx.fillStyle = o.color;
     ctx.fillRect(o.x, o.y, o.width, o.height);
 
-    o.y += calcDistanceToMove(delta,o.vy);
+    let movement = o.movement
+    switch(movement){
+      case 'V':
+        o.y += calcDistanceToMove(delta,o.v);
+        if(o.y > (449-o.height)) {
+          o.y = 448-o.height;
+          o.v = -o.v;
+        } 
+        if(o.y <1) {
+          o.y = 2;
+          o.v = -o.v;
+        }
+      break;
 
-    if(o.y > 250) {
-      console.log("y > 250 we reverse the speed");
-      // we must put the obstacle back at contact point
-      o.y = 249;
-      o.vy = -o.vy;
-    } 
-
-    if(o.y <40) {
-      o.y = 41;
-      o.vy = -o.vy;
+      case 'H':
+        o.x += calcDistanceToMove(delta,o.v);
+        if(o.x > (449-o.width)) {
+          o.x = 448-o.width;
+          o.v = -o.v
+        } 
+        if(o.x <1) {
+          o.x = 2;
+          o.v = -o.v;
+        }
+      break;
+      default:
+      break;
     }
   });
-
   ctx.restore();
 }
 
