@@ -84,8 +84,10 @@ function updatePlayers(listOfPlayers) {
 
 function drawPlayer(player) {
   ctx.save();
-  ctx.fillStyle = player.color;
+  ctx.strokeStyle = ctx.fillStyle = player.color;
   ctx.fillRect(player.x, player.y, 20, 20);
+  ctx.clearRect(player.x+5, player.y+5, 10, 10);
+  //ctx.fillRect(player.x+7.5, player.y+7.5, 5.15, 5.15);
   ctx.restore();
 }
 
