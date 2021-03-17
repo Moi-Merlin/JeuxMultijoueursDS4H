@@ -84,8 +84,8 @@ function updatePlayers(listOfPlayers) {
 
 function drawPlayer(player) {
   ctx.save();
-  ctx.translate(player.x, player.y);
-  ctx.fillRect(0, 0, 10, 10);
+  ctx.fillStyle = player.color;
+  ctx.fillRect(player.x, player.y, 20, 20);
   ctx.restore();
 }
 
@@ -194,14 +194,17 @@ function animationLoop(time) {
 
   delta = timer(time); // delta is in seconds
   
-
   if (username != undefined) {
-    // 1 On efface l'écran
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 2 On dessine des objets
-    drawAllPlayers();
+    try{
+      if (allPlayers[username].color == 'red'){
+        allPlayers[username].color = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+        console.log("player "+username+" new color is : "+allPlayers[username].color)
+      }
+    }catch(undefined){}
 
+    drawAllPlayers();
     drawTarget();
     drawObstacles();
 
@@ -211,7 +214,6 @@ function animationLoop(time) {
     //checkCollisionsPlayerWithObstacles()
   }
 
-  // 3 On rappelle la fonction d'animation à 60 im/s
   requestAnimationFrame(animationLoop);
 }
 
