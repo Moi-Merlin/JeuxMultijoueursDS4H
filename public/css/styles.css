@@ -12,6 +12,9 @@ body{
   background-color:white;
   text-decoration:none
 }
+#myCanvas:focus{
+  outline:none
+}
 
 
 .title{
@@ -49,7 +52,7 @@ body{
 .slider{
   -webkit-appearance: none;
   width: 70%;
-  height: 10px;
+  height: 9px;
   border-radius: 5px;  
   background: rgba(124, 163, 222, 0.896);
   outline: none;

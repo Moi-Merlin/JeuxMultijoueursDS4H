@@ -3,6 +3,7 @@ let conversation, data, datasend, users;
 let artificialLatencyDelay=0;
 let socket;
 
+
 // on load of page
 window.onload = init;
 
@@ -69,14 +70,16 @@ function init() {
 
   // listener, whenever the server emits 'updateusers', this updates the username list
   socket.on("updateusers", (listOfUsers) => {
-    users.innerHTML = "";
-    for (let name in listOfUsers) {
-      let userLineOfHTML = "<div color>" + name + "</div>";
-      console.log(listOfUsers)
-      users.innerHTML += userLineOfHTML;
-    }
+    writePlayerNames(listOfUsers)
   });
 
+  function writePlayerNames(listOfUsers){
+    users.innerHTML = "";
+    for (let name in listOfUsers) {
+      let userLineOfHTML = "<div>" + name + "</div>";
+      users.innerHTML += userLineOfHTML;
+    }
+  }
   // update the whole list of players, useful when a player
   // connects or disconnects, we must update the whole list
   socket.on("updatePlayers", (listOfplayers) => {

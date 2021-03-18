@@ -2,15 +2,14 @@ let canvas, ctx, mousePos;
 
 // Autres joueurs
 let allPlayers = {};
-let canv = document.getElementsByTagName("canvas")
 let target = {x:400, y:225, radius:40, color:'rgba(152, 222, 217, .5)'};
 
 let obstacles = [];
 
 // for time based animation
-// for time based animation
 let delta, oldTime;
 let playerSpeed = 100; // 100 pixels/s
+let playerSize = 20;
 
 function startGame() {
   console.log("init");
@@ -41,20 +40,23 @@ function processKeydown(event) {
 
   switch (event.key) {
     case "ArrowRight":
-      allPlayers[username].vx = playerSpeed;
+      if(allPlayers[username].x < canvas.width-playerSize){allPlayers[username].vx = playerSpeed;}
+      else{allPlayers[username].vx = 0}
       break;
     case "ArrowLeft":
-      allPlayers[username].vx = -playerSpeed;
+      if(allPlayers[username].x > 0){allPlayers[username].vx = -playerSpeed;}
+      else{allPlayers[username].vx = 0}
       break;
     case "ArrowUp":
-      allPlayers[username].vy = -playerSpeed;
+      if(allPlayers[username].y > 0){allPlayers[username].vy = -playerSpeed;}
+      else{allPlayers[username].vy = 0}
       break;
     case "ArrowDown":
       allPlayers[username].vy = playerSpeed;
+      if(allPlayers[username].y < canvas.height-playerSize){allPlayers[username].vy = playerSpeed;}
+      else{allPlayers[username].vy = 0}
       break;
   }
-
-  //console.log('keydown key = ' + event.key);
 }
 
 function processKeyup(event) {
@@ -78,7 +80,6 @@ function updatePlayerNewPos(newPos) {
 
 function updatePlayerNewColor(newColor){
   allPlayers[newColor.user].color = newColor.color
-  console.log(newColor.user+" "+newColor.color)
 }
 
 // Mise à jour du tableau quand un joueur arrive
@@ -90,7 +91,7 @@ function updatePlayers(listOfPlayers) {
 function drawPlayer(player) {
   ctx.save();
   ctx.strokeStyle = ctx.fillStyle = player.color;
-  ctx.fillRect(player.x, player.y, 20, 20);
+  ctx.fillRect(player.x, player.y, playerSize, playerSize);
   ctx.clearRect(player.x+5, player.y+5, 10, 10);
   //ctx.fillRect(player.x+7.5, player.y+7.5, 5.15, 5.15);
   ctx.restore();
@@ -103,10 +104,11 @@ function drawAllPlayers() {
 }
 
 function moveCurrentPlayer() {
-  if (allPlayers[username] !== undefined) {
-    allPlayers[username].x += calcDistanceToMove(delta, allPlayers[username].vx);
-    allPlayers[username].y += calcDistanceToMove(delta, allPlayers[username].vy);
+  let canv = document.querySelector("#myCanvas");
 
+  if (allPlayers[username] !== undefined) {
+    allPlayers[username].x += calcDistanceToMove(delta, allPlayers[username].vx)
+    allPlayers[username].y += calcDistanceToMove(delta, allPlayers[username].vy)
     socket.emit("sendpos", { user: username, pos: allPlayers[username]});
   }
 }
@@ -152,8 +154,6 @@ function drawObstacles() {
   obstacles.forEach(o => {
     ctx.fillStyle = o.color;
     ctx.fillRect(o.x, o.y, o.width, o.height);
-
-    let movement = o.movement
 
     o.y += calcDistanceToMove(delta,o.vy);
     if(o.y > (449-o.height)) {
@@ -201,7 +201,6 @@ function animationLoop(time) {
     try{
       if (allPlayers[username].color == 'red'){
         allPlayers[username].color = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
-        console.log("player "+username+" new color is : "+allPlayers[username].color)
         socket.emit("colorChange",{ user: username, color: allPlayers[username].color})
       }
       }catch(undefined){}

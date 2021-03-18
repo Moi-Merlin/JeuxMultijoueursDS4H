@@ -82,11 +82,6 @@ io.on('connection', (socket) => {
 		// tell all clients to update the list of users on the GUI
 		io.emit('updateusers', playerNames);
 
-		// Create a new player and store his position too... for that
-		// we have an object that is a "list of players" in that form
-		// listOfPlayer = {'michel':{'x':0, 'y':0, 'v':0}, 
-		// 							john:{'x':10, 'y':10, 'v':0}}
-		// for this example we have x, y and v for speed... ?
 		var player = {x:10, y:10, vx:0, vy:0, color:'red'};
 		listOfPlayers[username] = player;
 		io.emit('updatePlayers',listOfPlayers);
@@ -108,8 +103,7 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on("colorChange",(newColor)=>{
-		console.log(socket.username+" "+newColor )
-		socket.broadcast.emit('updateColor', socket.username, newColor);
+		socket.broadcast.emit('updateColor', socket.username, newColor, listOfPlayers);
 	})
 
 });
