@@ -162,7 +162,7 @@ function drawObstacles() {
     } 
     if(o.y <1) {
       o.y = 2;
-      o.v = -o.v;
+      o.vy = -o.vy;
     }
 
     o.x += calcDistanceToMove(delta,o.vx);

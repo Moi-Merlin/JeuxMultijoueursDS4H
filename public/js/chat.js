@@ -71,7 +71,8 @@ function init() {
   socket.on("updateusers", (listOfUsers) => {
     users.innerHTML = "";
     for (let name in listOfUsers) {
-      let userLineOfHTML = "<div>" + name + "</div>";
+      let userLineOfHTML = "<div color>" + name + "</div>";
+      console.log(listOfUsers)
       users.innerHTML += userLineOfHTML;
     }
   });
