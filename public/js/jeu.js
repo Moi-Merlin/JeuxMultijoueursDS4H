@@ -27,9 +27,9 @@ function startGame() {
 }
 
 function createObstacles() {
-  let o1 = {x:300, y:50, width:50, height:50, color:"goldenrod", v:50, range:10, movement:'V'}
-  let o2 = {x:150, y:50, width:20, height:50, color:"orange", v:30, range:100, movement:'V'}
-  let o3 = {x:50, y:50, width:60, height:20, color:"yellowgreen", v:40, range:100, movement:'H'}
+  let o1 = {x:300, y:50, width:50, height:50, color:"goldenrod", vx:50, vy:50, range:10, movement:'V'}
+  let o2 = {x:150, y:50, width:20, height:50, color:"orange", vx:30, vy:50, range:100, movement:'V'}
+  let o3 = {x:50, y:50, width:60, height:20, color:"yellowgreen", vx:40, vy:50, range:100, movement:'H'}
   obstacles.push(o1);
   obstacles.push(o2);
   obstacles.push(o3);
@@ -74,6 +74,11 @@ function processKeyup(event) {
 function updatePlayerNewPos(newPos) {
   allPlayers[newPos.user].x = newPos.pos.x;
   allPlayers[newPos.user].y = newPos.pos.y;
+}
+
+function updatePlayerNewColor(newColor){
+  allPlayers[newColor.user].color = newColor.color
+  console.log(newColor.user+" "+newColor.color)
 }
 
 // Mise à jour du tableau quand un joueur arrive
@@ -149,33 +154,27 @@ function drawObstacles() {
     ctx.fillRect(o.x, o.y, o.width, o.height);
 
     let movement = o.movement
-    switch(movement){
-      case 'V':
-        o.y += calcDistanceToMove(delta,o.v);
-        if(o.y > (449-o.height)) {
-          o.y = 448-o.height;
-          o.v = -o.v;
-        } 
-        if(o.y <1) {
-          o.y = 2;
-          o.v = -o.v;
-        }
-      break;
 
-      case 'H':
-        o.x += calcDistanceToMove(delta,o.v);
-        if(o.x > (449-o.width)) {
-          o.x = 448-o.width;
-          o.v = -o.v
-        } 
-        if(o.x <1) {
-          o.x = 2;
-          o.v = -o.v;
-        }
-      break;
-      default:
-      break;
+    o.y += calcDistanceToMove(delta,o.vy);
+    if(o.y > (449-o.height)) {
+      o.y = 448-o.height;
+      o.vy = -o.vy;
+    } 
+    if(o.y <1) {
+      o.y = 2;
+      o.v = -o.v;
     }
+
+    o.x += calcDistanceToMove(delta,o.vx);
+    if(o.x > (449-o.width)) {
+      o.x = 448-o.width;
+      o.vx = -o.vx
+    } 
+    if(o.x <1) {
+      o.x = 2;
+      o.vx = -o.vx;
+    }
+
   });
   ctx.restore();
 }
@@ -203,8 +202,9 @@ function animationLoop(time) {
       if (allPlayers[username].color == 'red'){
         allPlayers[username].color = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
         console.log("player "+username+" new color is : "+allPlayers[username].color)
+        socket.emit("colorChange",{ user: username, color: allPlayers[username].color})
       }
-    }catch(undefined){}
+      }catch(undefined){}
 
     drawAllPlayers();
     drawTarget();

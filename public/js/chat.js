@@ -63,6 +63,10 @@ function init() {
     updatePlayerNewPos(newPos);
   });
 
+  socket.on("updateColor", (username, newColor) =>{
+    updatePlayerNewColor(newColor);
+  })
+
   // listener, whenever the server emits 'updateusers', this updates the username list
   socket.on("updateusers", (listOfUsers) => {
     users.innerHTML = "";
@@ -87,6 +91,8 @@ function init() {
   socket.on("heartbeat",()=>{
     socket.emit("heart");
   });
+
+
 
   socket.on("data", (timestamp, rtt, serverTime) => {
     //console.log("rtt time received from server " + rtt);

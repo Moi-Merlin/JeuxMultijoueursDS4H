@@ -106,4 +106,10 @@ io.on('connection', (socket) => {
 		// echo globally that this client has left
 		socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
 	});
+
+	socket.on("colorChange",(newColor)=>{
+		console.log(socket.username+" "+newColor )
+		socket.broadcast.emit('updateColor', socket.username, newColor);
+	})
+
 });
