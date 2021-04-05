@@ -1,5 +1,3 @@
-//import * as BABYLON from 'babylonjs';
-//import 'babylonjs-materials';
 import Dude from "./Dude.js";
 import Buggy from "./Buggy.js";
 
@@ -256,10 +254,10 @@ function createHeroDude(scene) {
 
 function createBuggy(scene) {
     // load the buggy 3D animation model
-    BABYLON.SceneLoader.ImportMesh("", "models/Buggy/", "Buggy.gltf", scene, function (meshes) {  
-        let bugg1 = meshes[0];
-        buggy1.position = new BABYLON.Vector3(0, 0, 10);
-
+    BABYLON.SceneLoader.ImportMesh("", "models/Buggy/", "Buggy.gltf", scene, (newMeshes, particleSystems) => {  
+        let buggy1 = newMeshes[0];
+        buggy1.position = new BABYLON.Vector3(0, 100, 10);
+        buggy1.scaling = new BABYLON.Vector3(0.2, 0.2, 0.2);
         buggy1.name = "buggy";
         
     });
