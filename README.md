@@ -1,3 +1,4 @@
-# JeuxMultijoueursDS4H
+# JeuxMultijoueursDS4H 
+Cassandre Maire 2021 : Mineure JeuxMultijoueurs par Michel Buffa
 
-FIRST ASSIGNMENT (due to 18.03.2021) : Let's start programming the multiplayer layer
+Ce repository contient deux dossiers, Babylon et Multjoueurs, contenant respectivement le Tp de jeux 3D reposant sur Babylon JS et le TP multi-joueurs portant sur les communications Clients-Serveur.
