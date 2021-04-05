@@ -14,9 +14,6 @@ function startGame() {
     engine = new BABYLON.Engine(canvas, true);
     scene = createScene();
     createSkybox();
-
-    // modify some default settings (i.e pointer events to prevent cursor to go 
-    // out of the game window)
     modifySettings();
 
     let tank = scene.getMeshByName("heroTank");
@@ -27,7 +24,7 @@ function startGame() {
         tank.move();
 
         let heroDude = scene.getMeshByName("heroDude");
-        let buggy = scene.getMeshByName("buggy")
+
         if(heroDude)
             heroDude.Dude.move(scene);
 
@@ -45,7 +42,7 @@ function createSkybox(){
     var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:2000.0}, scene);
     var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
     skyboxMaterial.backFaceCulling = false;
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("images/Skyboxes/SkyboxSand", scene);
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("images/Skyboxes/skyboxPurple/skybox2", scene);
     skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
     skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
     skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
@@ -75,7 +72,7 @@ function createScene() {
 
 function createGround(scene) {
     // Create terrain material
-	var terrainMaterial = new BABYLON.StandardMaterial("terrainMaterial", scene);
+	var terrainMaterial = new BABYLON.TerrainMaterial("terrainMaterial", scene);
     terrainMaterial.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
     terrainMaterial.specularPower = 64;
     // Set the mix texture (represents the RGB values)
@@ -99,29 +96,21 @@ function createGround(scene) {
 	// Ground
 	var ground = BABYLON.Mesh.CreateGroundFromHeightMap("ground", "images/HMap.png", 2000, 2000, 100, 0, 100, scene, true);
 	ground.position.y = -2.05;
-	ground.material = terrainMaterial.material;
+	ground.material = terrainMaterial;
     ground.checkCollisions = true;
 	
     return ground;
-
-    /*const groundOptions = { width:2000, height:2000, subdivisions:200, minHeight:0, maxHeight:100, onReady: onGroundCreated};
-    //scene is optional and defaults to the current scene
-    const ground = BABYLON.MeshBuilder.CreateGroundFromHeightMap("gdhm", 'images/hmap1.png', groundOptions, scene); 
-
-    function onGroundCreated() {
-        const groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
-        groundMaterial.diffuseTexture = new BABYLON.Texture("images/brick2.jpeg");
-        ground.material = groundMaterial;
-        // to be taken into account by collision detection
-        ground.checkCollisions = true;
-        //groundMaterial.wireframe=true;
-    }
-    return ground;*/
 }
 
 function createLights(scene) {
     // i.e sun light with all light rays parallels, the vector is the direction.
     let light0 = new BABYLON.DirectionalLight("dir0", new BABYLON.Vector3(-1, -1, 0), scene);
+    light0.intensity = 0.4;
+
+    try{let buggy = scene.getMeshByName("buggy")
+        var spotlight0 = new BABYLON.SpotLight("spotLight0", new BABYLON.Vector3(buggy.position.x+6,
+            buggy.position.y+3, buggy.position.z), new BABYLON.Vector3(5, 0, 5), Math.PI / 3, 2, scene);
+    }catch{}
 
 }
 
@@ -256,10 +245,11 @@ function createBuggy(scene) {
     // load the buggy 3D animation model
     BABYLON.SceneLoader.ImportMesh("", "models/Buggy/", "Buggy.gltf", scene, (newMeshes, particleSystems) => {  
         let buggy1 = newMeshes[0];
-        buggy1.position = new BABYLON.Vector3(0, 100, 10);
-        buggy1.scaling = new BABYLON.Vector3(0.2, 0.2, 0.2);
+        buggy1.position = new BABYLON.Vector3(310, 101, -595);
+        buggy1.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
         buggy1.name = "buggy";
-        
+        buggy1.rotation.x = 180;
+        buggy1.rotation.z = 100;
     });
 }
 
