@@ -2,6 +2,11 @@ html, body {
     padding:0px;
     margin:0px;
 }
+body {
+    margin: 0;
+    height: 100vh;
+    background: #bdc3c7;
+  }
 
 #myCanvas {
     border:1px solid red;

@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "babylonjs": "^4.2.0",
+    "babylonjs-loaders": "^4.2.0",
+    "babylonjs-materials": "^4.2.0"
+  }
+}
