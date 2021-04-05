@@ -52,6 +52,7 @@ function createSkybox(){
 
 function createScene() {
     let scene = new BABYLON.Scene(engine);
+    //scene.gravity = new BABYLON.Vector3(0, -0.15, 0);
     let ground = createGround(scene);
     let freeCamera = createFreeCamera(scene);
 
@@ -107,10 +108,14 @@ function createLights(scene) {
     let light0 = new BABYLON.DirectionalLight("dir0", new BABYLON.Vector3(-1, -1, 0), scene);
     light0.intensity = 0.4;
 
-    try{let buggy = scene.getMeshByName("buggy")
-        var spotlight0 = new BABYLON.SpotLight("spotLight0", new BABYLON.Vector3(buggy.position.x+6,
-            buggy.position.y+3, buggy.position.z), new BABYLON.Vector3(5, 0, 5), Math.PI / 3, 2, scene);
-    }catch{}
+    var spotlight0 = new BABYLON.SpotLight("buggyLight", new BABYLON.Vector3(300, 150, -595), new BABYLON.Vector3(0, -50, 0), Math.PI / 3, 2, scene);
+    
+
+    var pointLight = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(300, 150, -595), scene);
+    pointLight.diffuseColor = new BABYLON.Color3(0.4, 1, 0.4);
+    // no reflection on the ground, specular color = black...
+    pointLight.specularColor = new BABYLON.Color3.Black;
+    pointLight.intensity = 0.7;
 
 }
 
@@ -171,7 +176,7 @@ function createTank(scene) {
         // collision uses by default "ellipsoids"
 
         let yMovement = 0;
-       
+
         if (tank.position.y > 2) {
             zMovement = 0;
             yMovement = -2;
@@ -197,7 +202,6 @@ function createTank(scene) {
             tank.rotation.y += 0.02;
             tank.frontVector = new BABYLON.Vector3(Math.sin(tank.rotation.y), 0, Math.cos(tank.rotation.y));
         }
-
     }
 
     return tank;
@@ -252,7 +256,6 @@ function createBuggy(scene) {
         buggy1.rotation.z = 100;
     });
 }
-
 
 function doClone(originalMesh, skeletons, id) {
     let myClone;
