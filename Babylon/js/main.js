@@ -1,5 +1,5 @@
 import Dude from "./Dude.js";
-import Buggy from "./Buggy.js";
+//import Buggy from "./Buggy.js";
 
 let canvas;
 let engine;
@@ -66,6 +66,7 @@ function createScene() {
     createLights(scene);
     createHeroDude(scene);
     createBuggy(scene);
+    createUfo(scene);
 
  
    return scene;
@@ -113,7 +114,6 @@ function createLights(scene) {
 
     var pointLight = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(300, 150, -595), scene);
     pointLight.diffuseColor = new BABYLON.Color3(0.4, 1, 0.4);
-    // no reflection on the ground, specular color = black...
     pointLight.specularColor = new BABYLON.Color3.Black;
     pointLight.intensity = 0.7;
 
@@ -255,6 +255,18 @@ function createBuggy(scene) {
         buggy1.rotation.x = 180;
         buggy1.rotation.z = 100;
     });
+}
+
+function createUfo(scene){
+    // load the Ufo 3D animation model
+    BABYLON.SceneLoader.ImportMesh("", "models/UFO/", "ufo.glb", scene, (newMeshes,particleSystems, skeletons) => {  
+        let ufo1 = newMeshes[0];
+        ufo1.position = new BABYLON.Vector3(300, 101, -595);
+        ufo1.scaling = new BABYLON.Vector3(100, 100, 100);
+        ufo1.name = "ufo";
+        let a = scene.beginAnimation(skeletons[0], 0, 120, true, 1);
+    });
+
 }
 
 function doClone(originalMesh, skeletons, id) {
