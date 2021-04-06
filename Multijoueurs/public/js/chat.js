@@ -3,6 +3,9 @@ let conversation, data, datasend, users;
 let artificialLatencyDelay=0;
 let socket;
 
+let numberPerSecond;
+let nbClientUpdatesPerSeconds = 12;
+
 
 // on load of page
 window.onload = init;
@@ -93,10 +96,36 @@ function init() {
 
   //heartbeat
   socket.on("heartbeat",()=>{
-    socket.emit("heart");
+    if (numberPerSecond === undefined){
+      socket.emit("initHeartbeat");
+    }
+    else {socket.emit("heart",numberPerSecond);}
   });
 
+  socket.on("globalHeartbeat", (nbUpdatesPerSeconds)=>{
+    console.log("New Heartbeat emmits by the server");
+    changeHeartbeatValue(nbUpdatesPerSeconds);
+  });
 
+  socket.on("hearbeatPerSecond",(nbUpdatesPerSeconds)=>{
+    console.log("hearbeat change by players");
+    changeHeartbeatValue(nbUpdatesPerSeconds);
+  });  
+
+  //Sending status to the server every (1000/nbClientUpdatesPerSeconds) ms
+  setInterval(()=>{
+    updateClient();
+	},1000/nbClientUpdatesPerSeconds); 
+
+  //listen for compute pos by the server
+  socket.on("computePos",(newComputePos)=>{
+    //display the computated position within the html
+    let spanXPos = document.querySelector("#xPos");
+    spanXPos.innerHTML = newComputePos[0];
+
+    let spanYPos = document.querySelector("#yPos");
+    spanYPos.innerHTML = newComputePos[1];
+  });
 
   socket.on("data", (timestamp, rtt, serverTime) => {
     //console.log("rtt time received from server " + rtt);
@@ -121,6 +150,15 @@ function init() {
   startGame();
 }
 
+function changeHeartbeatValue(value) {
+  numberPerSecond = parseInt(value);
+
+  let spanHeartbeat = document.querySelector("#heartbeat");
+  spanHeartbeat.innerHTML = numberPerSecond;
+  
+  document.querySelector("#heartbeatRange").value = hbPerSecond;
+}
+
 // PERMET D'ENVOYER SUR WEBSOCKET en simulant une latence (donnée par la valeur de delay)
 function send(typeOfMessage, data) {
   setTimeout(() => {
@@ -140,4 +178,8 @@ function changeNbUpdateSec(value) {
 
   let spanUpdateValue = document.querySelector("#nbUpdates");
   spanUpdateValue.innerHTML = nbUpdatesPerSeconds;
+}
+
+function updateClient(){
+  socket.emit("status",[getStatusPlayers(username),parseFloat(document.querySelector("#clientTime").textContent)]);
 }

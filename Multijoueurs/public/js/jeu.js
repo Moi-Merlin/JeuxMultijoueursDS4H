@@ -40,21 +40,45 @@ function processKeydown(event) {
 
   switch (event.key) {
     case "ArrowRight":
-      if(allPlayers[username].x < canvas.width-playerSize){allPlayers[username].vx = playerSpeed;}
-      else{allPlayers[username].vx = 0}
+      if(allPlayers[username].x < canvas.width-playerSize){
+        allPlayers[username].vx = playerSpeed;
+        socket.emit("movesRight");
+      }
+      else{
+        allPlayers[username].vx = 0;
+        socket.emit("stopHMovements");
+      }
       break;
     case "ArrowLeft":
-      if(allPlayers[username].x > 0){allPlayers[username].vx = -playerSpeed;}
-      else{allPlayers[username].vx = 0}
+      if(allPlayers[username].x > 0){
+        allPlayers[username].vx = -playerSpeed;
+        socket.emit("movesLeft");
+      }
+      else{
+        allPlayers[username].vx = 0;
+        socket.emit("stopHMovements");
+      }
       break;
     case "ArrowUp":
-      if(allPlayers[username].y > 0){allPlayers[username].vy = -playerSpeed;}
-      else{allPlayers[username].vy = 0}
+      if(allPlayers[username].y > 0){
+        allPlayers[username].vy = -playerSpeed;
+        socket.emit("movesUp");
+      }
+      else{
+        allPlayers[username].vy = 0;
+        socket.emit("stopVMovements");
+      }
       break;
     case "ArrowDown":
       allPlayers[username].vy = playerSpeed;
-      if(allPlayers[username].y < canvas.height-playerSize){allPlayers[username].vy = playerSpeed;}
-      else{allPlayers[username].vy = 0}
+      if(allPlayers[username].y < canvas.height-playerSize){
+        allPlayers[username].vy = playerSpeed;
+        socket.emit("movesDown");
+      }
+      else{
+        allPlayers[username].vy = 0;
+        socket.emit("stopVMovements");
+      }
       break;
   }
 }
@@ -64,10 +88,12 @@ function processKeyup(event) {
     case "ArrowRight":
     case "ArrowLeft":
       allPlayers[username].vx = 0;
+      socket.emit("stopHMovements");
       break;
     case "ArrowUp":
     case "ArrowDown":
       allPlayers[username].vy = 0;
+      socket.emit("stopVMovements");
       break;
   }
 }
@@ -103,13 +129,26 @@ function drawAllPlayers() {
   }
 }
 
+function getStatusPlayers(userName){
+  //console.log(allPlayers[userName]);
+  if (allPlayers[userName]!==undefined) return [allPlayers[userName].x, allPlayers[userName].y,allPlayers[userName].vx,allPlayers[userName].vy];
+}
+
 function moveCurrentPlayer() {
   let canv = document.querySelector("#myCanvas");
 
   if (allPlayers[username] !== undefined) {
     allPlayers[username].x += calcDistanceToMove(delta, allPlayers[username].vx)
     allPlayers[username].y += calcDistanceToMove(delta, allPlayers[username].vy)
+    
     socket.emit("sendpos", { user: username, pos: allPlayers[username]});
+    socket.emit("sendpos", { user: username, pos: allPlayers[username]});
+    //display current position
+    let spanCurrentXPos = document.querySelector("#PosX");
+    spanCurrentXPos.innerHTML = allPlayers[username].x.toFixed(2);
+
+    let spanCurrentYPos = document.querySelector("#PosY");
+    spanCurrentYPos.innerHTML = allPlayers[username].y.toFixed(2);
   }
 }
 

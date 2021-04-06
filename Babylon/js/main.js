@@ -260,7 +260,7 @@ function createHeroDude(scene) {
 
         // make clones
         scene.dudes = [];
-        for(let i = 0; i < 10; i++) {
+        for(let i = 0; i < 5; i++) {
             scene.dudes[i] = doClone(heroDude, skeletons, i);
             scene.beginAnimation(scene.dudes[i].skeleton, 0, 120, true, 1);
 

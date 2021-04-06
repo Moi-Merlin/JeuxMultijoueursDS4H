@@ -20,11 +20,14 @@ app.get('/', (req, res) => {
 // nom des joueurs connectés sur le chat
 var playerNames = {};
 var listOfPlayers = {};
+var playerStatus = {};
+let nbUpdatesPerSeconds;
+let xSpeed = 0;
+let ySpeed = 0;
 
 io.on('connection', (socket) => {
 	let emitStamp;
 	let connectionStamp = Date.now();
-	let nbUpdatesPerSeconds;
 
 	// Pour le ping/pong mesure de latence
 	setInterval(() => {
@@ -42,15 +45,43 @@ io.on('connection', (socket) => {
 		socket.emit("data", currentTime, timeElapsedSincePing, serverTimeElapsedSinceClientConnected);
 	});
 
+	//listen for movement of the client
+	socket.on("movesRight",()=>{
+		xSpeed = 100;
+	});
+	socket.on("movesLeft",()=>{
+		xSpeed = -100;
+	});
+	socket.on("movesUp",()=>{
+		ySpeed = -100
+	});
+	socket.on("movesDown",()=>{
+		ySpeed = 100;
+	});
+	socket.on("stopMovingHorizontaly",()=>{
+		xSpeed = 0;
+	});
+	socket.on("stopMovingVerticaly",()=>{
+		ySpeed = 0;
+	});
+
 	//Heartbeat
 	setInterval(()=>{
-		nbUpdatesPerSeconds = 2;
 		socket.emit("heartbeat");
+		socket.emit("computePos",animateServerSide(socket.username));
 	},1000/nbUpdatesPerSeconds);
 
-	socket.on("heart", ()=> {
-		//console.log("heartbeat of:" + nbUpdatesPerSeconds + "per seconds");
-		socket.emit("hearbeat", nbUpdatesPerSeconds);
+	socket.on("heart", (numberPerSecond)=> {
+		if (numberPerSecond && numberPerSecond != nbUpdatesPerSeconds){
+			nbUpdatesPerSeconds = numberPerSecond;
+			socket.broadcast.emit("hearbeatPerSecond", nbUpdatesPerSeconds);
+			console.log("IMPORTANT : Heartbeat changes, it is now ="+nbUpdatesPerSeconds);
+		}
+	});
+
+	socket.on("initHeartbeat",()=>{
+		if(nbUpdatesPerSeconds <0){ nbUpdatesPerSeconds = 0;}
+		socket.emit("globalHeartbeat",nbUpdatesPerSeconds);
 	});
 
 	// when the client emits 'sendchat', this listens and executes
@@ -107,3 +138,14 @@ io.on('connection', (socket) => {
 	})
 
 });
+
+function animateServerSide(username){
+	if (playerStatus[username]!==undefined ){
+		if (playerStatus[username][0],playerStatus[username][1] !== null){
+			//console.log(playerStatus[username]);
+			var newXPos = playerStatus[username][0][0] + xSpeed;
+			var newYPos = playerStatus[username][0][1]+ ySpeed;
+		}
+	}
+	return [newXPos,newYPos];
+}

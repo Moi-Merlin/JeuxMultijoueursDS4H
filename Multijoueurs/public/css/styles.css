@@ -4,6 +4,8 @@ body{
   margin: 0px;
   padding: 0px;
   overflow: hidden;
+  background-image:url("../assets/wallpaper.jpg");
+  background-size: 100%;
 }
 
 #myCanvas {
@@ -21,25 +23,22 @@ body{
   color: rgba(0, 106, 255, 0.66);
   font-size: large;
 }
-
-.userList {
+.userList, .chatMessages{
+  background-color: rgba(152, 155, 159, 0.8);
   font-family: Helvetica;
   float: left;
-  width:100px;
   height:250px;
-  border-right: 2px solid black;
   padding:10px;
   overflow:scroll-y;
 }
+.userList {
+  width:100px;
+  border-right: 2px solid black;
+}
 
 .chatMessages {
-  float: left;
-  font-family: Helvetica;
   width:300px;
-  height:250px;
-  overflow:scroll-y;
-  padding:10px;
-  color: grey;
+  color: rgba(241, 152, 63, 0.847);
 }
 
 .infos{
