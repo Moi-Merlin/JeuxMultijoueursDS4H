@@ -19,9 +19,11 @@ function startGame() {
     let tank = scene.getMeshByName("heroTank");
 
     engine.runRenderLoop(() => {
+        
         let deltaTime = engine.getDeltaTime(); // remind you something ?
 
         tank.move();
+        textDisplay(scene);
 
         let heroDude = scene.getMeshByName("heroDude");
 
@@ -36,6 +38,28 @@ function startGame() {
 
         scene.render();
     });
+}
+
+function textDisplay(scene){
+    var scoreTexture = new BABYLON.DynamicTexture("scoreTexture", 512, scene, true);
+    var scoreboard = BABYLON.Mesh.CreatePlane("scoreboard", 20, scene);
+    scoreboard.position = new BABYLON.Vector3(10,8,640);
+    scoreboard.material = new BABYLON.StandardMaterial("scoradboardMat", scene);
+    scoreboard.material.diffuseTexture = scoreTexture;
+    scoreTexture.drawText("Salut à toi terrien!", 40, 100,"bold 50px Arial", "white","rgb(173,27,174)",true,true);
+    scoreTexture.drawText("    Tu t'es perdu ?", 40, 160,"50px Arial", "white",null,true,true);
+    scoreTexture.drawText("Mais d'où vient cet", 40, 240,"50px Arial", "white",null,true,true);
+    scoreTexture.drawText("     étrange buit ?", 40, 300,"50px Arial", "white",null,true,true);
+    scoreTexture.drawText("  A toi de trouver!", 40, 360,"bold 50px Arial", "white",null,true,true);
+    scoreTexture.drawText("   PS : fais attention", 40, 440,"40px Arial", "white",null,true,true);
+    
+    /*var img = new Image();
+    img.src = './images/OtherAssets/Board.png';
+    img.onload = function() {
+        droreboard.drawImage(this, 0, 0);
+        scoreboard.update();
+    }*/
+    return(scene)
 }
 
 function createSkybox(){
@@ -55,6 +79,11 @@ function createScene() {
     //scene.gravity = new BABYLON.Vector3(0, -0.15, 0);
     let ground = createGround(scene);
     let freeCamera = createFreeCamera(scene);
+    // Enable gravity on the scene. Should be similar to earth's gravity. 
+    scene.gravity = new BABYLON.Vector3(0, -0.98, 0);
+    // Enable collisions globally. 
+    scene.collisionsEnabled = true;
+    
 
     let tank = createTank(scene);
 
@@ -162,9 +191,10 @@ function createTank(scene) {
     tankMaterial.diffuseColor = new BABYLON.Color3.Red;
     tankMaterial.emissiveColor = new BABYLON.Color3.Blue;
     tank.material = tankMaterial;
+    tank.checkCollisions = true;
 
     // By default the box/tank is in 0, 0, 0, let's change that...
-    tank.position.y = 40;
+    tank.position = new BABYLON.Vector3(10,0,600);
     tank.speed = 3;
     tank.frontVector = new BABYLON.Vector3(0, 0, 1);
 
@@ -254,6 +284,7 @@ function createBuggy(scene) {
         buggy1.name = "buggy";
         buggy1.rotation.x = 180;
         buggy1.rotation.z = 100;
+        return buggy1;
     });
 }
 
@@ -265,6 +296,7 @@ function createUfo(scene){
         ufo1.scaling = new BABYLON.Vector3(100, 100, 100);
         ufo1.name = "ufo";
         let a = scene.beginAnimation(skeletons[0], 0, 120, true, 1);
+        console.log(ufo1);
     });
 
 }

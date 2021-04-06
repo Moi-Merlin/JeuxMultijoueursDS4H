@@ -1,6 +1,7 @@
 export default class Dude {
     constructor(dudeMesh, speed) {
         this.dudeMesh = dudeMesh;
+        dudeMesh.checkCollisions = true;
 
         if(speed)
             this.speed = speed;
