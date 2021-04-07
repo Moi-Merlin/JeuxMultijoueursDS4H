@@ -120,11 +120,11 @@ function init() {
   //listen for compute pos by the server
   socket.on("computePos",(newComputePos)=>{
     //display the computated position within the html
-    let spanXPos = document.querySelector("#xPos");
-    spanXPos.innerHTML = newComputePos[0];
+    let xPos = document.querySelector("#PosX");
+    xPos.innerHTML = newComputePos[0];
 
-    let spanYPos = document.querySelector("#yPos");
-    spanYPos.innerHTML = newComputePos[1];
+    let yPos = document.querySelector("#PosY");
+    yPos.innerHTML = newComputePos[1];
   });
 
   socket.on("data", (timestamp, rtt, serverTime) => {
