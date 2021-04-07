@@ -70,6 +70,7 @@ function createSkybox(){
     skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
     skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
     skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+    skyboxMaterial.disableLighting = true;
     skybox.material = skyboxMaterial;
     return skybox;
 }
@@ -96,9 +97,26 @@ function createScene() {
     createHeroDude(scene);
     createBuggy(scene);
     createUfo(scene);
-
+    createSolarSystem(scene);
+    createSpheres(scene);
  
    return scene;
+}
+
+function createSpheres(scene){
+    //var waterMesh = BABYLON.MeshBuilder.CreateSphere("waterSphere", {diameter : 40}, scene);
+    /*var water = new BABYLON.WaterMaterial("water", scene, new BABYLON.Vector2(1024, 1024));
+	water.backFaceCulling = true;
+	water.bumpTexture = new BABYLON.Texture("images/Ground/water_bump.png", scene);
+	water.windForce = 5;
+	water.waveHeight = 0.1;
+	water.bumpHeight = 0.5;
+	water.waveLength = 0.5;
+    water.waterColor = new BABYLON.Color3(0.047, 0.23, 0.015);
+	water.colorBlendFactor = 0;
+	waterMesh.material = water;*/
+    //waterMesh.position = new BABYLON.Vector3(100,100,100);
+    return scene;
 }
 
 function createGround(scene) {
@@ -175,7 +193,7 @@ function createFollowCamera(scene, target) {
     let camera = new BABYLON.FollowCamera("tankFollowCamera", target.position, scene, target);
 
     camera.radius = 80; // how far from the object to follow
-	camera.heightOffset = 20; // how high above the object to place the camera
+	camera.heightOffset = 15; // how high above the object to place the camera
 	camera.rotationOffset = 180; // the viewing angle
 	camera.cameraAcceleration = .1; // how fast to move
 	camera.maxCameraSpeed = 5; // speed limit
@@ -288,6 +306,18 @@ function createBuggy(scene) {
     });
 }
 
+function createSolarSystem(scene) {
+    // load the buggy 3D animation model
+    BABYLON.SceneLoader.ImportMesh("", "models/SolarSystem/", "solar_system.glb", scene, (newMeshes) => {  
+        let fort = newMeshes[0];
+        fort.position = new BABYLON.Vector3(10, 100, 500);
+        fort.scaling = new BABYLON.Vector3(150, 150, 150);
+        fort.name = "fort";
+        fort.disableLighting = true;
+        return fort;
+    });
+}
+
 function createUfo(scene){
     // load the Ufo 3D animation model
     BABYLON.SceneLoader.ImportMesh("", "models/UFO/", "ufo.glb", scene, (newMeshes,particleSystems, skeletons) => {  
@@ -296,7 +326,6 @@ function createUfo(scene){
         ufo1.scaling = new BABYLON.Vector3(100, 100, 100);
         ufo1.name = "ufo";
         let a = scene.beginAnimation(skeletons[0], 0, 120, true, 1);
-        console.log(ufo1);
     });
 
 }
