@@ -99,6 +99,7 @@ function createScene() {
     createUfo(scene);
     createSolarSystem(scene);
     createSpheres(scene);
+    createTree(scene);
  
    return scene;
 }
@@ -307,14 +308,39 @@ function createBuggy(scene) {
 }
 
 function createSolarSystem(scene) {
-    // load the buggy 3D animation model
+    // load the solar system 3D animation model
     BABYLON.SceneLoader.ImportMesh("", "models/SolarSystem/", "solar_system.glb", scene, (newMeshes) => {  
-        let fort = newMeshes[0];
-        fort.position = new BABYLON.Vector3(10, 100, 500);
-        fort.scaling = new BABYLON.Vector3(150, 150, 150);
-        fort.name = "fort";
-        fort.disableLighting = true;
-        return fort;
+        let ss = newMeshes[0];
+        ss.position = new BABYLON.Vector3(10, 200, 350);
+        ss.scaling = new BABYLON.Vector3(150, 150, 150);
+        ss.name = "ss";
+        ss.emissiveColor = new BABYLON.Color3(155, 0, 0);
+        ss.disableLighting = true;
+        return ss;
+    });
+}
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
+
+function createTree(scene){
+    // load the trees 3D animation model
+    BABYLON.SceneLoader.ImportMesh("", "models/Tree/", "birchTree1.glb", scene, (newMeshes) => {  
+        let tree = newMeshes[0];
+        tree.position = new BABYLON.Vector3(10, 0, 550);
+        tree.scaling = new BABYLON.Vector3(8, 8, 8);
+        tree.name = "tree";
+
+        let trees = [];
+        trees[0] = tree
+
+        for(let i = 1; i < 58; i++) {
+            trees[i] = tree.clone("tree"+i);
+            trees[i].position = new BABYLON.Vector3(getRandomInt(1780)-800, 0, getRandomInt(690)+300)
+
+        }
+        return trees;
     });
 }
 
