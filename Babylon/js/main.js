@@ -1,5 +1,4 @@
 import Dude from "./Dude.js";
-//import Buggy from "./Buggy.js";
 
 let canvas;
 let engine;
@@ -15,26 +14,25 @@ function startGame() {
     scene = createScene();
     createSkybox();
     modifySettings();
+    
+    // enable physics
+    scene.enablePhysics();
 
     let tank = scene.getMeshByName("heroTank");
+    // second parameter is the target to follow
+    let followCamera = createFollowCamera(scene, tank);
+    scene.activeCamera = followCamera;
 
     engine.runRenderLoop(() => {
         
         let deltaTime = engine.getDeltaTime(); // remind you something ?
 
         tank.move();
+        
         textDisplay(scene);
 
-        let heroDude = scene.getMeshByName("heroDude");
-
-        if(heroDude)
-            heroDude.Dude.move(scene);
-
-        if(scene.dudes) {
-            for(var i = 0 ; i < scene.dudes.length ; i++) {
-                scene.dudes[i].Dude.move(scene);
-            }
-        }    
+        //moveHeroDude();
+        moveOtherDudes();   
 
         scene.render();
     });
@@ -80,18 +78,15 @@ function createScene() {
     //scene.gravity = new BABYLON.Vector3(0, -0.15, 0);
     let ground = createGround(scene);
     let freeCamera = createFreeCamera(scene);
-    // Enable gravity on the scene. Should be similar to earth's gravity. 
+    /*// Enable gravity on the scene. Should be similar to earth's gravity. 
     scene.gravity = new BABYLON.Vector3(0, -0.98, 0);
     // Enable collisions globally. 
-    scene.collisionsEnabled = true;
-    
-
+    scene.collisionsEnabled = true;*/
+   
     let tank = createTank(scene);
 
-    // second parameter is the target to follow
-    let followCamera = createFollowCamera(scene, tank);
     //followcamera.attachControl(canvas, true);
-    scene.activeCamera = followCamera;
+    
 
     createLights(scene);
     createHeroDude(scene);
@@ -148,7 +143,10 @@ function createGround(scene) {
 	ground.position.y = -2.05;
 	ground.material = terrainMaterial;
     ground.checkCollisions = true;
-	
+
+    /*ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground,
+        BABYLON.PhysicsImpostor.HeightmapImpostor, { mass: 0 }, scene);    
+	*/
     return ground;
 }
 
@@ -225,6 +223,7 @@ function createTank(scene) {
         // collision uses by default "ellipsoids"
 
         let yMovement = 0;
+        //console.log(tank.position);
 
         if (tank.position.y > 2) {
             zMovement = 0;
@@ -253,7 +252,6 @@ function createTank(scene) {
         }
     }
 
-    return tank;
 }
 
 function createHeroDude(scene) {
@@ -261,9 +259,9 @@ function createHeroDude(scene) {
     // name, folder, skeleton name 
     BABYLON.SceneLoader.ImportMesh("him", "models/Dude/", "Dude.babylon", scene,  (newMeshes, particleSystems, skeletons) => {
         let heroDude = newMeshes[0];
-        heroDude.position = new BABYLON.Vector3(0, 0, 5);  // The original dude
+        heroDude.position = new BABYLON.Vector3(-150, -2, 650);  // The original dude
         // make it smaller 
-        heroDude.scaling = new BABYLON.Vector3(0.2  , 0.2, 0.2);
+        heroDude.scaling = new BABYLON.Vector3(0.2 , 0.2, 0.2);
         //heroDude.speed = 0.1;
 
         // give it a name so that we can query the scene to get it by name
@@ -275,11 +273,11 @@ function createHeroDude(scene) {
         // loop the animation, speed, 
         let a = scene.beginAnimation(skeletons[0], 0, 120, true, 1);
 
-        let hero = new Dude(heroDude, 0.1);
+        let hero = new Dude(heroDude, -1, 0.1, 0.2, scene);
 
         // make clones
         scene.dudes = [];
-        for(let i = 0; i < 5; i++) {
+        for(let i = 0; i < 10; i++) {
             scene.dudes[i] = doClone(heroDude, skeletons, i);
             scene.beginAnimation(scene.dudes[i].skeleton, 0, 120, true, 1);
 
@@ -289,7 +287,7 @@ function createHeroDude(scene) {
             // and the meshes have a property "Dude" that IS the instance
             // see render loop then....
         }
-         
+        scene.dudes.push(heroDude);
 
     });
 }
@@ -301,8 +299,7 @@ function createBuggy(scene) {
         buggy1.position = new BABYLON.Vector3(310, 101, -595);
         buggy1.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
         buggy1.name = "buggy";
-        buggy1.rotation.x = 180;
-        buggy1.rotation.z = 100;
+        buggy1.rotation.y = Math.PI;
         return buggy1;
     });
 }
@@ -328,7 +325,7 @@ function createTree(scene){
     // load the trees 3D animation model
     BABYLON.SceneLoader.ImportMesh("", "models/Tree/", "birchTree1.glb", scene, (newMeshes) => {  
         let tree = newMeshes[0];
-        tree.position = new BABYLON.Vector3(10, 0, 550);
+        tree.position = new BABYLON.Vector3(10, -3, 550);
         tree.scaling = new BABYLON.Vector3(8, 8, 8);
         tree.name = "tree";
 
@@ -337,11 +334,67 @@ function createTree(scene){
 
         for(let i = 1; i < 58; i++) {
             trees[i] = tree.clone("tree"+i);
-            trees[i].position = new BABYLON.Vector3(getRandomInt(1780)-800, 0, getRandomInt(690)+300)
-
+            trees[i].position = new BABYLON.Vector3(getRandomInt(1780)-800, -3, getRandomInt(690)+300)
+            let size = getRandomInt(5)+6
+            trees[i].scaling = new BABYLON.Vector3(size,size,size)
+            trees[i].rotation.y = (Math.PI/2)*getRandomInt(4);
         }
-        return trees;
+        for(let i = 58; i < 68; i++) {
+            trees[i] = tree.clone("tree"+i);
+            trees[i].position = new BABYLON.Vector3(getRandomInt(295)+700, -3, getRandomInt(270)+30)
+            let size = getRandomInt(5)+6
+            trees[i].scaling = new BABYLON.Vector3(size,size,size)
+        }
     });
+
+    let cactus = [];
+
+    BABYLON.SceneLoader.ImportMesh("", "models/Tree/", "cactusFleur1.glb", scene, (newMeshes) => {  
+        let cactusFleur1 = newMeshes[0];
+        cactusFleur1.position = new BABYLON.Vector3(0, 95, -550);
+        cactusFleur1.scaling = new BABYLON.Vector3(8, 8, 8);
+        cactusFleur1.name = "cactusFleur10";
+
+        cactus[0] = cactusFleur1
+
+        for(let i = 1; i < 7; i++) {
+            cactus[i] = cactusFleur1.clone("cactusFleur1"+i);
+        }
+    }); 
+    
+    BABYLON.SceneLoader.ImportMesh("", "models/Tree/", "cactus.glb", scene, (newMeshes) => {  
+        let cactus = newMeshes[0];
+        cactus.position = new BABYLON.Vector3(10, 95, -540);
+        cactus.scaling = new BABYLON.Vector3(8, 8, 8);
+        cactus.name = "cactus0";
+
+        cactus[7] = cactus
+
+        for(let i = 8; i < 12; i++) {
+            cactus[i] = cactus.clone("cactus"+i);
+        }
+    }); 
+
+    BABYLON.SceneLoader.ImportMesh("", "models/Tree/", "cactusFleur2.glb", scene, (newMeshes) => {  
+        let cactusFleur2 = newMeshes[0];
+        cactusFleur2.position = new BABYLON.Vector3(20, 95, -540);
+        cactusFleur2.scaling = new BABYLON.Vector3(8, 8, 8);
+        cactusFleur2.name = "cactusFleur20";      
+
+        cactus[12] = cactusFleur2
+
+        for(let i = 13; i < 18; i++) {
+            cactus[i] = cactusFleur2.clone("cactusFleur2"+i);
+        }
+    }); 
+
+    for(let i; i<cactus.lengt; i++){
+        cactus[i].position = new BABYLON.Vector3(getRandomInt(470)-10, 96, getRandomInt(480)-760)
+        let size = getRandomInt(5)+6
+        cactus[i].scaling = new BABYLON.Vector3(size,size,size)
+        cactus[i].rotation.y = (Math.PI/2)*getRandomInt(4);
+    }
+    
 }
 
 function createUfo(scene){
@@ -358,11 +411,9 @@ function createUfo(scene){
 
 function doClone(originalMesh, skeletons, id) {
     let myClone;
-    let xrand = Math.floor(Math.random()*500 - 250);
-    let zrand = Math.floor(Math.random()*500 - 250);
 
     myClone = originalMesh.clone("clone_" + id);
-    myClone.position = new BABYLON.Vector3(xrand, 0, zrand);
+    myClone.position = new BABYLON.Vector3(getRandomInt(1780)-800, -2, getRandomInt(690)+300);
 
     if(!skeletons) return myClone;
 
@@ -391,6 +442,13 @@ function doClone(originalMesh, skeletons, id) {
     }
 
     return myClone;
+}
+function moveOtherDudes() {
+    if(scene.dudes) {
+        for(var i = 0 ; i < scene.dudes.length ; i++) {
+            scene.dudes[i].Dude.move(scene);
+        }
+    }    
 }
 
 window.addEventListener("resize", () => {
@@ -438,7 +496,9 @@ function modifySettings() {
            inputStates.down = true;
         }  else if (event.key === " ") {
            inputStates.space = true;
-        }
+        } else if ((event.key === "l") || (event.key === "L")) {
+            inputStates.laser = true;
+         }
     }, false);
 
     //if the key will be released, change the states object 
@@ -453,19 +513,9 @@ function modifySettings() {
            inputStates.down = false;
         }  else if (event.key === " ") {
            inputStates.space = false;
-        }
+        } else if ((event.key === "l") || (event.key === "L")) {
+            inputStates.laser = false;
+         }
     }, false);
-
-    /*function createSkybox(){
-        var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:1000.0}, scene);
-        var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
-        skyboxMaterial.backFaceCulling = false;
-        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", scene);
-        skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-        skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-        skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-        skybox.material = skyboxMaterial;
-        return skybox;
-    }*/
 }
 

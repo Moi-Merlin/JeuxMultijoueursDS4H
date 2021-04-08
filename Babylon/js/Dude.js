@@ -29,7 +29,10 @@ export default class Dude {
         this.dudeMesh.rotation.y = alpha;
 
         // let make the Dude move towards the tank
-        if(distance > 30) {
+
+        // Les dudes ne se déplaceront vers le joueur que si il est dans un rayon de x unités
+        // ils sont "dormants" le reste du temps et deviennent des "enemis" quand on les approche
+        if(distance < 5000 && distance > 30) {
             //a.restart();   
             this.dudeMesh.moveWithCollisions(dir.multiplyByFloats(this.speed, this.speed, this.speed));
         }
