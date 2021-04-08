@@ -3,12 +3,20 @@ import Dude from "./Dude.js";
 let canvas;
 let engine;
 let scene;
-// vars for handling inputs
+
 let inputStates = {};
 
-window.onload = startGame;
+window.onload = startGame();
+
+setTimeout(() => {
+    document.getElementById("LS").style.display = "none";
+    console.log("scene is now loaded");
+    document.getElementById("myCanvas").style.display = "";
+},10000);
 
 function startGame() {
+    document.getElementById("myCanvas").style.display = "none";
+
     canvas = document.querySelector("#myCanvas");
     engine = new BABYLON.Engine(canvas, true);
     scene = createScene();
@@ -93,26 +101,9 @@ function createScene() {
     createBuggy(scene);
     createUfo(scene);
     createSolarSystem(scene);
-    createSpheres(scene);
     createTree(scene);
  
    return scene;
-}
-
-function createSpheres(scene){
-    //var waterMesh = BABYLON.MeshBuilder.CreateSphere("waterSphere", {diameter : 40}, scene);
-    /*var water = new BABYLON.WaterMaterial("water", scene, new BABYLON.Vector2(1024, 1024));
-	water.backFaceCulling = true;
-	water.bumpTexture = new BABYLON.Texture("images/Ground/water_bump.png", scene);
-	water.windForce = 5;
-	water.waveHeight = 0.1;
-	water.bumpHeight = 0.5;
-	water.waveLength = 0.5;
-    water.waterColor = new BABYLON.Color3(0.047, 0.23, 0.015);
-	water.colorBlendFactor = 0;
-	waterMesh.material = water;*/
-    //waterMesh.position = new BABYLON.Vector3(100,100,100);
-    return scene;
 }
 
 function createGround(scene) {
@@ -255,15 +246,15 @@ function createTank(scene) {
 }
 
 function createHeroDude(scene) {
-   // load the Dude 3D animated model
+    // load the Dude 3D animated model
     // name, folder, skeleton name 
-    BABYLON.SceneLoader.ImportMesh("him", "models/Dude/", "Dude.babylon", scene,  (newMeshes, particleSystems, skeletons) => {
+    BABYLON.SceneLoader.ImportMesh("him", "models/Dude/", "Dude.babylon", scene, (newMeshes, particleSystems, skeletons) => {
         let heroDude = newMeshes[0];
-        heroDude.position = new BABYLON.Vector3(-150, -2, 650);  // The original dude
-        // make it smaller 
-        heroDude.scaling = new BABYLON.Vector3(0.2 , 0.2, 0.2);
-        //heroDude.speed = 0.1;
+        heroDude.position = new BABYLON.Vector3(-150, -2, 650); // The original dude
 
+        // make it smaller 
+        heroDude.scaling = new BABYLON.Vector3(0.2, 0.2, 0.2);
+        //heroDude.speed = 0.1;
         // give it a name so that we can query the scene to get it by name
         heroDude.name = "heroDude";
 
@@ -273,11 +264,11 @@ function createHeroDude(scene) {
         // loop the animation, speed, 
         let a = scene.beginAnimation(skeletons[0], 0, 120, true, 1);
 
-        let hero = new Dude(heroDude, -1, 0.1, 0.2, scene);
+        let hero = new Dude(heroDude, -1, 0.5, 0.2, scene);
 
         // make clones
         scene.dudes = [];
-        for(let i = 0; i < 10; i++) {
+        for (let i = 0; i < 10; i++) {
             scene.dudes[i] = doClone(heroDude, skeletons, i);
             scene.beginAnimation(scene.dudes[i].skeleton, 0, 120, true, 1);
 
@@ -359,6 +350,10 @@ function createTree(scene){
 
         for(let i = 1; i < 7; i++) {
             cactus[i] = cactusFleur1.clone("cactusFleur1"+i);
+            cactus[i].position = new BABYLON.Vector3(getRandomInt(470)-10, 96, getRandomInt(480)-760)
+            let size = getRandomInt(5)+6
+            cactus[i].scaling = new BABYLON.Vector3(size,size,size)
+            cactus[i].rotation.y = (Math.PI/2)*getRandomInt(4);
         }
     }); 
     
@@ -372,6 +367,10 @@ function createTree(scene){
 
         for(let i = 8; i < 12; i++) {
             cactus[i] = cactus.clone("cactus"+i);
+            cactus[i].position = new BABYLON.Vector3(getRandomInt(470)-10, 96, getRandomInt(480)-760)
+            let size = getRandomInt(5)+6
+            cactus[i].scaling = new BABYLON.Vector3(size,size,size)
+            cactus[i].rotation.y = (Math.PI/2)*getRandomInt(4);
         }
     }); 
 
@@ -385,15 +384,12 @@ function createTree(scene){
 
         for(let i = 13; i < 18; i++) {
             cactus[i] = cactusFleur2.clone("cactusFleur2"+i);
+            cactus[i].position = new BABYLON.Vector3(getRandomInt(470)-10, 96, getRandomInt(480)-760)
+            let size = getRandomInt(5)+6
+            cactus[i].scaling = new BABYLON.Vector3(size,size,size)
+            cactus[i].rotation.y = (Math.PI/2)*getRandomInt(4);
         }
-    }); 
-
-    for(let i; i<cactus.lengt; i++){
-        cactus[i].position = new BABYLON.Vector3(getRandomInt(470)-10, 96, getRandomInt(480)-760)
-        let size = getRandomInt(5)+6
-        cactus[i].scaling = new BABYLON.Vector3(size,size,size)
-        cactus[i].rotation.y = (Math.PI/2)*getRandomInt(4);
-    }
+    });        
     
 }
 
