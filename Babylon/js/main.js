@@ -16,10 +16,12 @@ setTimeout(() => {
 
 function startGame() {
     document.getElementById("myCanvas").style.display = "none";
-
     canvas = document.querySelector("#myCanvas");
     engine = new BABYLON.Engine(canvas, true);
-    scene = createScene();
+    scene = createScene(); 
+
+    scene.enablePhysics();
+
     createSkybox();
     modifySettings();
     
@@ -36,7 +38,8 @@ function startGame() {
         let deltaTime = engine.getDeltaTime(); // remind you something ?
 
         tank.move();
-        
+        tank.fireCannonBalls(); // will fire only if space is pressed !
+
         textDisplay(scene);
 
         //moveHeroDude();
@@ -83,18 +86,10 @@ function createSkybox(){
 
 function createScene() {
     let scene = new BABYLON.Scene(engine);
-    //scene.gravity = new BABYLON.Vector3(0, -0.15, 0);
     let ground = createGround(scene);
     let freeCamera = createFreeCamera(scene);
-    /*// Enable gravity on the scene. Should be similar to earth's gravity. 
-    scene.gravity = new BABYLON.Vector3(0, -0.98, 0);
-    // Enable collisions globally. 
-    scene.collisionsEnabled = true;*/
    
-    let tank = createTank(scene);
-
-    //followcamera.attachControl(canvas, true);
-    
+    let tank = createTank(scene);    
 
     createLights(scene);
     createHeroDude(scene);
@@ -159,13 +154,9 @@ function createLights(scene) {
 function createFreeCamera(scene) {
     let camera = new BABYLON.FreeCamera("freeCamera", new BABYLON.Vector3(20, 70, 20), scene);
     camera.attachControl(canvas);
-    // prevent camera to cross ground
     camera.checkCollisions = true; 
-    // avoid flying with the camera
     camera.applyGravity = true;
 
-    // Add extra keys for camera movements
-    // Need the ascii code of the extra key(s). We use a string method here to get the ascii code
     camera.keysUp.push('z'.charCodeAt(0));
     camera.keysDown.push('s'.charCodeAt(0));
     camera.keysLeft.push('q'.charCodeAt(0));
@@ -199,7 +190,7 @@ function createTank(scene) {
     tankMaterial.diffuseColor = new BABYLON.Color3.Red;
     tankMaterial.emissiveColor = new BABYLON.Color3.Blue;
     tank.material = tankMaterial;
-    tank.checkCollisions = true;
+    tank.applyGravity = true;
 
     // By default the box/tank is in 0, 0, 0, let's change that...
     tank.position = new BABYLON.Vector3(10,0,600);
@@ -242,6 +233,58 @@ function createTank(scene) {
             tank.frontVector = new BABYLON.Vector3(Math.sin(tank.rotation.y), 0, Math.cos(tank.rotation.y));
         }
     }
+    // to avoid firing too many cannonball rapidly
+    tank.canFireCannonBalls = true;
+    tank.fireCannonBallsAfter = 0.1; // in seconds
+
+    tank.fireCannonBalls = function() {
+
+        if(!inputStates.space) return;
+
+        if(!this.canFireCannonBalls) return;
+
+        this.canFireCannonBalls = false;
+
+        setTimeout(() => {
+            this.canFireCannonBalls = true;
+        }, 1000 * this.fireCannonBallsAfter);
+
+        let cannonball = BABYLON.MeshBuilder.CreateSphere("cannonball", {diameter: 2, segments: 32}, scene);
+        cannonball.material = new BABYLON.StandardMaterial("Fire", scene);
+        cannonball.material.diffuseTexture = new BABYLON.Texture("images/OtherAssets/Fire.jpg", scene)
+
+        let pos = this.position;
+        cannonball.position = new BABYLON.Vector3(pos.x, pos.y+1, pos.z);
+        cannonball.position.addInPlace(this.frontVector.multiplyByFloats(5, 5, 5));
+        cannonball.physicsImpostor = new BABYLON.PhysicsImpostor(cannonball,
+            BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1 }, scene);    
+
+        let powerOfFire = 100;
+        let azimuth = 0.1; 
+        let aimForceVector = new BABYLON.Vector3(this.frontVector.x*powerOfFire, (this.frontVector.y+azimuth)*powerOfFire,this.frontVector.z*powerOfFire);
+        
+        cannonball.physicsImpostor.applyImpulse(aimForceVector,cannonball.getAbsolutePosition());
+
+        cannonball.actionManager = new BABYLON.ActionManager(scene);
+        scene.dudes.forEach(dude => {
+            cannonball.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
+                {trigger : BABYLON.ActionManager.OnIntersectionEnterTrigger,
+                parameter : dude.Dude.bounder}, 
+                () => {
+                    dude.Dude.bounder.dispose();
+                    dude.dispose();
+                    setTimeout(() => {
+                        cannonball.dispose();
+                    }, 10);
+                     // j'ai remarqué que si on fait disparaitre au bout de x temps cela devient plus fluide
+                }
+            ));
+        });
+
+        setTimeout(() => {
+            cannonball.dispose();
+        }, 1000);
+    }
 
 }
 
@@ -252,31 +295,18 @@ function createHeroDude(scene) {
         let heroDude = newMeshes[0];
         heroDude.position = new BABYLON.Vector3(-150, -2, 650); // The original dude
 
-        // make it smaller 
-        heroDude.scaling = new BABYLON.Vector3(0.2, 0.2, 0.2);
-        //heroDude.speed = 0.1;
-        // give it a name so that we can query the scene to get it by name
         heroDude.name = "heroDude";
 
-        // there might be more than one skeleton in an imported animated model. Try console.log(skeletons.length)
-        // here we've got only 1. 
-        // animation parameters are skeleton, starting frame, ending frame,  a boolean that indicate if we're gonna 
-        // loop the animation, speed, 
         let a = scene.beginAnimation(skeletons[0], 0, 120, true, 1);
 
         let hero = new Dude(heroDude, -1, 0.5, 0.2, scene);
 
-        // make clones
         scene.dudes = [];
         for (let i = 0; i < 10; i++) {
             scene.dudes[i] = doClone(heroDude, skeletons, i);
             scene.beginAnimation(scene.dudes[i].skeleton, 0, 120, true, 1);
 
-            // Create instance with move method etc.
-            var temp = new Dude(scene.dudes[i], 0.3);
-            // remember that the instances are attached to the meshes
-            // and the meshes have a property "Dude" that IS the instance
-            // see render loop then....
+            var temp = new Dude(scene.dudes[i], i, 0.3, 0.2, scene);
         }
         scene.dudes.push(heroDude);
 
@@ -350,7 +380,7 @@ function createTree(scene){
 
         for(let i = 1; i < 7; i++) {
             cactus[i] = cactusFleur1.clone("cactusFleur1"+i);
-            cactus[i].position = new BABYLON.Vector3(getRandomInt(470)-10, 96, getRandomInt(480)-760)
+            cactus[i].position = new BABYLON.Vector3(getRandomInt(450)-10, 96, getRandomInt(480)-760)
             let size = getRandomInt(5)+6
             cactus[i].scaling = new BABYLON.Vector3(size,size,size)
             cactus[i].rotation.y = (Math.PI/2)*getRandomInt(4);
@@ -367,7 +397,7 @@ function createTree(scene){
 
         for(let i = 8; i < 12; i++) {
             cactus[i] = cactus.clone("cactus"+i);
-            cactus[i].position = new BABYLON.Vector3(getRandomInt(470)-10, 96, getRandomInt(480)-760)
+            cactus[i].position = new BABYLON.Vector3(getRandomInt(450)-10, 96, getRandomInt(480)-760)
             let size = getRandomInt(5)+6
             cactus[i].scaling = new BABYLON.Vector3(size,size,size)
             cactus[i].rotation.y = (Math.PI/2)*getRandomInt(4);
@@ -384,7 +414,7 @@ function createTree(scene){
 
         for(let i = 13; i < 18; i++) {
             cactus[i] = cactusFleur2.clone("cactusFleur2"+i);
-            cactus[i].position = new BABYLON.Vector3(getRandomInt(470)-10, 96, getRandomInt(480)-760)
+            cactus[i].position = new BABYLON.Vector3(getRandomInt(450)-10, 96, getRandomInt(480)-760)
             let size = getRandomInt(5)+6
             cactus[i].scaling = new BABYLON.Vector3(size,size,size)
             cactus[i].rotation.y = (Math.PI/2)*getRandomInt(4);
@@ -406,9 +436,7 @@ function createUfo(scene){
 }
 
 function doClone(originalMesh, skeletons, id) {
-    let myClone;
-
-    myClone = originalMesh.clone("clone_" + id);
+    let myClone = originalMesh.clone("clone_" + id);
     myClone.position = new BABYLON.Vector3(getRandomInt(1780)-800, -2, getRandomInt(690)+300);
 
     if(!skeletons) return myClone;
@@ -439,6 +467,7 @@ function doClone(originalMesh, skeletons, id) {
 
     return myClone;
 }
+
 function moveOtherDudes() {
     if(scene.dudes) {
         for(var i = 0 ; i < scene.dudes.length ; i++) {
