@@ -8,11 +8,12 @@ let inputStates = {};
 
 window.onload = startGame();
 
+
 setTimeout(() => {
     document.getElementById("LS").style.display = "none";
     console.log("scene is now loaded");
     document.getElementById("myCanvas").style.display = "";
-},10000);
+},20000);
 
 function startGame() {
     document.getElementById("myCanvas").style.display = "none";
@@ -20,12 +21,9 @@ function startGame() {
     engine = new BABYLON.Engine(canvas, true);
     scene = createScene(); 
 
-    scene.enablePhysics();
-
     createSkybox();
     modifySettings();
     
-    // enable physics
     scene.enablePhysics();
 
     let tank = scene.getMeshByName("heroTank");
@@ -99,6 +97,7 @@ function createScene() {
 function createGround(scene) {
     // Create terrain material
 	var terrainMaterial = new BABYLON.TerrainMaterial("terrainMaterial", scene);
+    terrainMaterial.allowShaderHotSwapping = false
     terrainMaterial.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
     terrainMaterial.specularPower = 64;
     // Set the mix texture (represents the RGB values)
@@ -124,10 +123,6 @@ function createGround(scene) {
 	ground.position.y = -2.05;
 	ground.material = terrainMaterial;
     ground.checkCollisions = true;
-
-    /*ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground,
-        BABYLON.PhysicsImpostor.HeightmapImpostor, { mass: 0 }, scene);    
-	*/
     return ground;
 }
 
@@ -250,7 +245,7 @@ function createTank(scene) {
 
         let pos = this.position;
         cannonball.position = new BABYLON.Vector3(pos.x, pos.y+1, pos.z);
-        cannonball.position.addInPlace(this.frontVector.multiplyByFloats(5, 5, 5));
+        cannonball.position.addInPlace(this.frontVector);
         cannonball.physicsImpostor = new BABYLON.PhysicsImpostor(cannonball,
             BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1 }, scene);    
 
