@@ -36,15 +36,10 @@ function startGame() {
     engine.runRenderLoop(() => {
         
         let deltaTime = engine.getDeltaTime(); // remind you something ?
-
         tank.move();
         tank.fireCannonBalls(); // will fire only if space is pressed !
-
         textDisplay(scene);
-
-        //moveHeroDude();
         moveOtherDudes();   
-
         scene.render();
     });
 }
